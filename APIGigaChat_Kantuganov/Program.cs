@@ -6,23 +6,34 @@ using System.Text;
 using System.Threading.Tasks;
 using APIGigaChat_Kantuganov.Models.Response;
 using Newtonsoft.Json;
-using static APIGigaChat_Kantuganov.Models.Request;
+using APIGigaChat_Kantuganov.Models;
 
 namespace APIGigaChat_Kantuganov
 {
     public class Program
     {
-        public string ClientId = "***";
+        public static string ClientId = "7879c628-132f-4ec9-b371-309d6472aa56";
 
-        public string AuthorizationKey = "***";
-        static async void Main(string[] args)
+        public static string AuthorizationKey = "Nzg3OWM2MjgtMTMyZi00ZWM5LWIzNzEtMzA5ZDY0NzJhYTU2Ojg3ZWQ0YjYyLWVlOGUtNGFjMC1hNjE3LTMwY2U3YmRiNmQ4Mg==";
+        static async Task Main(string[] args)
         {
             string Token = await GetToken(ClientId, AuthorizationKey);
+            if (Token == null) {
+                Console.WriteLine("Не удалось получить токен");
+                return;
+            }
+
+            while (true) {
+                Console.WriteLine("Сообщение: ");
+                string Message = Console.ReadLine();
+                ResponseMessage answer = await GetAnswer(Token, Message);
+                Console.WriteLine("Ответ: " + answer.choices[0].message.content);
+            }
         }
         public static async Task<string> GetToken(string rqUID, string bearer)
         {
             string ReturnToken = null;
-            string Uri = "https://ngu.devices.Sberbank.ru:98B3/api/v2/aauth";
+            string Uri = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth";
 
             using (HttpClientHandler Handler = new HttpClientHandler())
             {
@@ -64,7 +75,7 @@ namespace APIGigaChat_Kantuganov
 
             using (HttpClientHandler Handler = new HttpClientHandler())
             {
-                Handler.ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true;
+                Handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
 
                 using (HttpClient Client = new HttpClient(Handler))
                 {
@@ -78,9 +89,9 @@ namespace APIGigaChat_Kantuganov
                         model = "GigaChat",
                         stream = false,
                         repetition_penalty = 1,
-                        messages = new List<Message>()
+                        messages = new List<Request.Message>()
                 {
-                    new Message()
+                    new Request.Message()
                     {
                         role = "user",
                         content = message
